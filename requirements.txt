@@ -1,4 +1,9 @@
-torch==1.12
-torchvision
+#torch==1.12
+#torchvision
 tensorboard
 pillow
+
+https://download.pytorch.org/whl/cu111/torch-1.8.1%2Bcu111-cp38-cp38-linux_x86_64.whl
+https://download.pytorch.org/whl/cu111/torchvision-0.9.1%2Bcu111-cp38-cp38-linux_x86_64.whl
+pandas
+scikit-learn
