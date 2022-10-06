@@ -77,7 +77,7 @@ for cats in categories:
 
 
         img_bin = np.asarray(img_bin, dtype='uint8')
-        img_bin = cv2.adaptiveThreshold(img_bin, 100, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 2)
+        img_bin = cv2.adaptiveThreshold(img_bin, 100, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 2)
         
         plt.figure(0)
         plt.subplot(2,2,1)
