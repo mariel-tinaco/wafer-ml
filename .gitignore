@@ -3,3 +3,5 @@ venv/
 env/
 
 data/
+ADC_Dataset/.DS_Store
+*.jpg
