@@ -63,7 +63,7 @@ for cats in categories:
         
         # Contrast Enhancer
         enhancer = ImageEnhance.Contrast(Image.fromarray(den))
-        img_gray = enhancer.enhance(2)
+        img_gray = np.asarray(enhancer.enhance(2),dtype='uint8')
         
 
         # Using Denoised Image
@@ -78,7 +78,8 @@ for cats in categories:
 
         img_bin = np.asarray(img_bin, dtype='uint8')
         img_bin = cv2.adaptiveThreshold(img_bin, 100, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 2)
-        
+    
+
         plt.figure(0)
         plt.subplot(2,2,1)
         plt.imshow(img,cmap='gray')
@@ -87,12 +88,8 @@ for cats in categories:
         plt.imshow(den,cmap='gray')
         plt.title('Denoised')
         plt.subplot(2,2,3)
-        plt.imshow(img_gray,cmap='gray')
-        plt.title('Enhanced')
-        plt.subplot(2,2,4)
         plt.imshow(img_bin,cmap='gray')
         plt.title('Binary')
-
         
         # Get the LINES
         # PROCESS HORIZONTAL COMPONENT
@@ -118,4 +115,13 @@ for cats in categories:
         plt.imshow(vertical,cmap='gray')
         plt.title('Vertical Lines')
         
+
+        dst = cv2.inpaint(img_gray,horizontal,21,cv2.INPAINT_TELEA)
+        dst = cv2.inpaint(dst,vertical,21,cv2.INPAINT_TELEA)
+        
+        plt.figure(0)
+        plt.subplot(2,2,4)
+        plt.imshow(dst,cmap='gray')
+        plt.title('Inpainting')
+
         plt.show()
