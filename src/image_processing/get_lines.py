@@ -5,32 +5,6 @@ from PIL import Image, ImageOps, ImageEnhance, ImageFilter
 import cv2
 import numpy as np
 
-def binarize(img):
-    try:
-        img = Image.fromarray(img)
-    except Exception as e:
-        print(e)
-    #initialize threshold
-    thresh=5
-
-    #convert image to greyscale
-    img=img.convert('L') 
-
-    width,height=img.size
-
-    #traverse through pixels 
-    for x in range(width):
-        for y in range(height):
-            #if intensity less than threshold, assign white
-            if img.getpixel((x,y)) < thresh:
-                img.putpixel((x,y),0)
-
-            #if intensity greater than threshold, assign black 
-            else:
-                img.putpixel((x,y),255)
-
-    return img
-
 cwd = os.getcwd()
 source_path = './wafer-ml/ADC_Dataset/train/'
 categories = [
@@ -51,14 +25,14 @@ categories = [
 for cats in categories: 
     fnames = os.listdir(source_path+cats)
 
-    for i in range(15,16):
+    for i in range(21,22):
         plt.rcParams["figure.figsize"] = [10, 10]
         plt.rcParams["figure.autolayout"] = True
         img = Image.open(source_path+cats+'/'+fnames[i])
         img = ImageOps.grayscale(img)
 
         # Denoising
-        den = cv2.fastNlMeansDenoising(np.asarray(img),None,10,11,51)
+        den = cv2.fastNlMeansDenoising(np.asarray(img),None,10,7,21)
 
         
         # Contrast Enhancer
@@ -77,8 +51,8 @@ for cats in categories:
 
 
         img_bin = np.asarray(img_bin, dtype='uint8')
-        img_bin = cv2.adaptiveThreshold(img_bin, 100, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 2)
-    
+        img_bin = cv2.adaptiveThreshold(img_bin, 100, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 7, 2)
+
 
         plt.figure(0)
         plt.subplot(2,2,1)
@@ -94,10 +68,10 @@ for cats in categories:
         # Get the LINES
         # PROCESS HORIZONTAL COMPONENT
         horizontal = img_bin
-        horizontal_size = int(np.shape(horizontal)[1] / 50) # size of 8
+        horizontal_size = int(np.shape(horizontal)[1] / 30) # size of 8
         horizontalStructure = cv2.getStructuringElement(cv2.MORPH_RECT,(horizontal_size,1))
-        horizontal = cv2.erode(horizontal,horizontalStructure,iterations=2)
-        horizontal = cv2.dilate(horizontal,horizontalStructure,iterations=7)
+        horizontal = cv2.erode(horizontal,horizontalStructure,iterations=1)
+        horizontal = cv2.dilate(horizontal,horizontalStructure,iterations=30)
         plt.figure(1)
         plt.subplot(1,2,1)
         plt.imshow(horizontal,cmap='gray')
@@ -106,19 +80,21 @@ for cats in categories:
 
         # PROCESS VERTICAL COMPONENT
         vertical = img_bin
-        vertical_size = int(np.shape(vertical)[1] / 50) # size of 8
+        vertical_size = int(np.shape(vertical)[1] / 30) # size of 8
         verticalStructure = cv2.getStructuringElement(cv2.MORPH_RECT,(1,vertical_size))
-        vertical = cv2.erode(vertical,verticalStructure,iterations=2)
-        vertical = cv2.dilate(vertical,verticalStructure,iterations=7)
+        vertical = cv2.erode(vertical,verticalStructure,iterations=1)
+        vertical = cv2.dilate(vertical,verticalStructure,iterations=30)
         
         plt.subplot(1,2,2)
         plt.imshow(vertical,cmap='gray')
         plt.title('Vertical Lines')
         
-
-        dst = cv2.inpaint(img_gray,horizontal,21,cv2.INPAINT_TELEA)
-        dst = cv2.inpaint(dst,vertical,21,cv2.INPAINT_TELEA)
+        dst = np.asarray(img,dtype='uint8')
+        dst = cv2.inpaint(dst,horizontal,3,cv2.INPAINT_TELEA)
+        dst = cv2.inpaint(dst,vertical,3,cv2.INPAINT_TELEA)
         
+
+
         plt.figure(0)
         plt.subplot(2,2,4)
         plt.imshow(dst,cmap='gray')
