@@ -5,3 +5,6 @@ env/
 data/
 ADC_Dataset/.DS_Store
 *.jpg
+*.0
+*.hdf5
+*.npz

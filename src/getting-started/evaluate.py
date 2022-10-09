@@ -11,7 +11,7 @@ if __name__ == "__main__":
     device = "cpu"
 
     # load the test images
-    data_dir = "ADC_Dataset/test/"
+    data_dir = "./ADC_Dataset/test/"
     items = os.listdir(data_dir)
     items.sort()
 

@@ -6,10 +6,10 @@ from torch.utils.tensorboard import SummaryWriter
 if __name__ == "__main__":
     # this defines where we'll perform our training.  By default, we use the cpu.
     # if you have a GPU and cuda set up properly, you can instead set this to 'cuda'
-    device = "cpu"
+    device = 'cuda'
 
     # build our training data and validation data sets
-    dataset = ADC_Dataset("ADC_Dataset/train", training=True)
+    dataset = ADC_Dataset("./ADC_Dataset/train", training=True)
     n_images = len(dataset)
     n_val = int(n_images*0.1)
     n_train = n_images - n_val
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # initialize our model, loss function, and optimizer
     # torchvision provides a variety of pre-built architectures, let's try one of those.
-    model = torchvision.models.resnet18(num_classes=num_classes)
+    model = torchvision.models.resnet50(num_classes=num_classes)
     model.to(device)
 
     # we use the Adam optimizer, which is a little fancier than standard SGD
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     step_counter = 0
 
-    for epoch in range(10):
+    for epoch in range(50):
         print("EPOCH", epoch)
         # initialize a fresh iterator for each epoch.  Each epoch is one pass over
         # the entire training dataset.
@@ -97,12 +97,12 @@ if __name__ == "__main__":
             # now the optimizer takes a step in the direction indicated by the gradients we just computed.
             optimizer.step()
 
-            print(
+            '''print(
                 step_counter,
                 epoch,
-                batch_loss.detach().numpy(),
-                accuracy.detach().numpy(),
-            )
+                batch_loss.cpu().detach().numpy(),
+                accuracy.cpu().detach().numpy(),
+            )'''
             step_counter += 1
 
         # at the end of each epoch, we want to validation our model's performance on the validation set
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         writer.add_scalar("Validation Accuracy", validation_accuracy, step_counter)
         print(
             "Valdation Accuracy",
-            validation_accuracy.detach().numpy(),
+            validation_accuracy.cpu().detach().numpy(),
         )
         
         

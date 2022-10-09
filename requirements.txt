@@ -2,3 +2,10 @@ torch==1.12
 torchvision
 tensorboard
 pillow
+keras
+scikit-learn
+pandas
+pickle
+numpy
+scipy
+nvidia-pyindex
