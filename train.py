@@ -1,11 +1,12 @@
 # from adc_dataset import ADC_Dataset
 import torchvision
+from torch import nn
 import torch.utils.data
 from torch.utils.tensorboard import SummaryWriter
 import math
 from datetime import datetime
 from models import test_model
-from sampler import StratifiedBatchSampler
+#from sampler import StratifiedBatchSampler
 import numpy as np
 from torchvision import transforms
 from sklearn.model_selection import train_test_split
@@ -20,8 +21,6 @@ if __name__ == "__main__":
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
     save_folder = 'logs'
-#     model_name = 'mobilenetv2'
-    model_name = 'resnet18'
 #     data_set = 'ADC_Dataset'
     data_set = 'ADC_Dataset_Augmented' 
     train_dir = data_set + '/train'
@@ -59,9 +58,24 @@ if __name__ == "__main__":
     print("Loaded ", n_images, " images")
     print("Training split: ", n_train)
     print("Validation split: ", n_val)
+#######################################################################################
+#     model_name = 'mobilenetv2'
+#     model = torchvision.models.mobilenet.mobilenet_v2(pretrained=True)
+#     model.classifier = nn.Linear(1280, num_classes)  
+#     for layer_n, param in enumerate(model.parameters()):
+#         if layer_n <10:
+#             param.requires_grad = False      
+#######################################################################################   
 
-    #model = torchvision.models.mobilenet.mobilenet_v2(num_classes=num_classes)
-    model = test_model.ResNet34(num_classes=num_classes)
+#######################################################################################
+    model_name = 'resnet18'
+    model = torchvision.models.resnet18(pretrained=True)
+    model.fc = nn.Linear(512, num_classes)  
+    
+#######################################################################################
+
+#     model = test_model.ResNet34(num_classes=num_classes)
+    
     model.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
