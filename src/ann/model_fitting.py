@@ -14,7 +14,7 @@ from sklearn.model_selection import train_test_split
 
 # Keras
 import keras 
-from keras.applications import EfficientNetB5,EfficientNetB0
+from keras.applications import EfficientNetB0,ResNet50
 from keras.models import Sequential
 from keras.layers import Dense,Dropout,Conv2D,MaxPooling2D,Flatten,Input
 from keras.optimizers import Adam
@@ -31,7 +31,7 @@ np.random.seed(seed)
 headless = False
 
 # load the npz file
-data_path = os.getcwd()+'/DATASET_NPZ/train_test_224.npz'
+data_path = os.getcwd()+'/DATASET_NPZ/preproc_train_test_224.npz'
 train_data   = np.load(data_path)
 
 # extract the training and validation data sets from this data
@@ -40,23 +40,21 @@ y_train = train_data['y_train']
 x_test= train_data['x_test']
 y_test = train_data['y_test']
 
-print(np.shape(x_train[0]))
-input()
-
-# Reshape the images.
+'''# Reshape the images.
 x_train = np.expand_dims(x_train, axis=3)
 x_test = np.expand_dims(x_test, axis=3)
+'''
 
-print(np.shape(x_train[0]))
-input()
+print('Input Shape')
+print(np.shape(x_train))
+print(np.shape(x_test))
 
-input_shape = np.asarray([np.shape(x_train[0])])
+input_shape = np.asarray(np.shape(x_train[0]))
 n_classes = len(np.unique(y_train))
-
 
 '''
 # CNN
-# 3x3 Kernel
+# 3x3 Kernels
 model = Sequential()
 model.add(Conv2D(filters = 256,kernel_size=(3,3),activation='relu',input_shape=input_shape))
 model.add(Conv2D(filters = 128,kernel_size=(3,3),activation='relu'))
@@ -80,10 +78,10 @@ model.add(Dense(n_classes, activation='softmax'))
 '''
 #EfficientNetB0
 # Create the Model 
-inputs = Input(input_shape)
+inputs = Input(shape = input_shape)
 
 x = inputs
-outputs = EfficientNetB0(include_top=True, weights=None, classes=n_classes)(x)
+outputs = EfficientNetB0(include_top=True, weights = None, classes=n_classes)(x)
 model = keras.Model(inputs, outputs)
 
 
@@ -94,7 +92,7 @@ print(model.summary)
 # set the optimiser
 opt = Adam()
 # compile the model
-model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
+model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['acc'])
 
 # set up a model checkpoint callback (including making the directory where to 
 # save our weights)
@@ -106,19 +104,13 @@ checkpointer = ModelCheckpoint(filepath=directory+filename,
                                save_best_only=True)
 
 # set the model parameters
-n_epochs = 500 
-batch_size = 64 #n_images
-
-
-# Prepare the Data Chunks
-
-
-print(np.shape(x_train))
+n_epochs = 10 
+batch_size = 16 #n_images
 
 # fit the model
 history = model.fit(x=x_train, y = y_train,
                     epochs=n_epochs,
-                    batch_size= 16,
+                    batch_size= batch_size,
                     validation_data=(x_test, y_test),
                     shuffle=True,
                     callbacks=[checkpointer])
@@ -140,6 +132,10 @@ if headless:
 import matplotlib.pyplot as plt
 
 # plot the results
+plot_dir = os.getcwd() + '/Plots/'
+if os.path.exists(plot_dir) == False:
+        print('Creating Folder:   ',plot_dir)
+        os.makedirs(plot_dir)
 # accuracy
 f1 = plt.figure()
 ax1 = f1.add_subplot(111)
@@ -153,7 +149,7 @@ plt.text(0.4, 0.05,
          ('validation accuracy = {0:.3f}'.format(best_accuracy)), 
          ha='left', va='center', 
          transform=ax1.transAxes)
-plt.savefig('./Plots/Training_accuracy_{0}.png'
+plt.savefig(plot_dir+'/Training_accuracy_{0}.png'
             .format(time.strftime("%Y%m%d_%H%M")))
 
 # loss
@@ -170,7 +166,7 @@ plt.text(0.4, 0.05,
           .format(min(history.history['val_loss']))), 
          ha='right', va='top', 
          transform=ax2.transAxes)
-plt.savefig('./Plots/Training_loss_{0}.png'
+plt.savefig(plot_dir+'/Training_loss_{0}.png'
             .format(time.strftime("%Y%m%d_%H%M")))
 
 # we're all done!

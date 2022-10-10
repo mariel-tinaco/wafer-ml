@@ -8,3 +8,4 @@ ADC_Dataset/.DS_Store
 *.0
 *.hdf5
 *.npz
+*.pth

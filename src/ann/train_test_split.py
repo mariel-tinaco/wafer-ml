@@ -28,7 +28,7 @@ num_classes = len(class_names)
 
 # set the directory where the data lives
 froot = os.getcwd()
-fpath = ('./ADC_Dataset/train/')
+fpath = ('./ADC_Dataset/preproccesed/')
 root_dir =  froot + fpath
 
 # Get the Filenames and Filepaths of the Figures
@@ -70,14 +70,13 @@ EfficientNetB5	456
 EfficientNetB6	528
 EfficientNetB7	600
 '''
-IMG_SIZE = (240,240) 
+IMG_SIZE = (224,224) 
 
 x_train = []
 y_train = []
 for i,paths in enumerate(x_train_path):
     # Reformat the Image (Color, Size)
     img = cv2.imread(paths)
-    img = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
     img = cv2.resize(img,IMG_SIZE)
 
     # Append to Images and Label Array
@@ -90,7 +89,6 @@ y_test = []
 for i,paths in enumerate(x_test_path):
     # Reformat the Image (Color, Size)
     img = cv2.imread(paths)
-    img = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
     img = cv2.resize(img,IMG_SIZE)
 
     # Append to Images and Label Array
@@ -99,7 +97,7 @@ for i,paths in enumerate(x_test_path):
 
 
 # save the data with numpy so we can use it later
-datafile = os.getcwd()+'/DATASET_NPZ/train_test_'+str(IMG_SIZE[0])+'.npz'
+datafile = os.getcwd()+'/DATASET_NPZ/preproc_train_test_'+str(IMG_SIZE[0])+'.npz'
 np.savez(datafile, 
         x_train = x_train, y_train = y_train,
         x_test=x_test, y_test=y_test,)

@@ -32,7 +32,7 @@ def binarize(img):
     return img
 
 cwd = os.getcwd()
-source_path = './ADC_Dataset/ADC_Dataset/train/'
+source_path = './ADC_Dataset/ADC_Dataset/preproccessed/'
 categories = [
         'CMPMicroscratch',
         'CrystalDislocation',

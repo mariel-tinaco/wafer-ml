@@ -9,9 +9,9 @@ if __name__ == "__main__":
     device = 'cuda'
 
     # build our training data and validation data sets
-    dataset = ADC_Dataset("./ADC_Dataset/train", training=True)
+    dataset = ADC_Dataset("./ADC_Dataset/preproccesed", training=True)
     n_images = len(dataset)
-    n_val = int(n_images*0.1)
+    n_val = int(n_images*.25)
     n_train = n_images - n_val
     num_classes = dataset.num_classes()
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # initialize our model, loss function, and optimizer
     # torchvision provides a variety of pre-built architectures, let's try one of those.
-    model = torchvision.models.resnet50(num_classes=num_classes)
+    model = torchvision.models.resnet34(num_classes=num_classes)
     model.to(device)
 
     # we use the Adam optimizer, which is a little fancier than standard SGD
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     loss_fn = torch.nn.CrossEntropyLoss()
 
     # create a logger so that we can track our progress on tensorboard
-    writer = SummaryWriter("./logs/resnet18")
+    writer = SummaryWriter("./logs/resnet34")
 
     step_counter = 0
 
@@ -97,12 +97,12 @@ if __name__ == "__main__":
             # now the optimizer takes a step in the direction indicated by the gradients we just computed.
             optimizer.step()
 
-            '''print(
+            print(
                 step_counter,
                 epoch,
                 batch_loss.cpu().detach().numpy(),
                 accuracy.cpu().detach().numpy(),
-            )'''
+            )
             step_counter += 1
 
         # at the end of each epoch, we want to validation our model's performance on the validation set
@@ -134,11 +134,13 @@ if __name__ == "__main__":
         print(
             "Valdation Accuracy",
             validation_accuracy.cpu().detach().numpy(),
+            'Train Accuracy',
+            accuracy.cpu().detach().numpy(),
         )
         
         
         # finally, at the end of each epoch, save a checkpoint
-        torch.save(model.state_dict(), "resnet18_{:02d}.pth".format(epoch))
+        torch.save(model.state_dict(), "resnet34_{:02d}.pth".format(epoch))
 
     # save our final model with a canonical name rather than relying on epoch numbers
-    torch.save(model.state_dict(), "resnet18_final.pth")
+    torch.save(model.state_dict(), "resnet34_final.pth")
