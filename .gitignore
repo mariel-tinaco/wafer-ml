@@ -10,3 +10,6 @@ dataset/
 example/
 src/
 .vscode/
+compare.py
+AWS/
+ADC_Dataset_Augmented/

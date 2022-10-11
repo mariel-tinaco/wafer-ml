@@ -22,23 +22,33 @@ if __name__ == "__main__":
 
     # load the trained model
 #######################################################################################
-    model = torchvision.models.resnet18(num_classes=len(id_to_cat_map))
-    model.fc = nn.Linear(512, len(id_to_cat_map))
-    save_file = 'predictions-resnet18.csv'
+
+#     model_name = "resnet18"
+#     model = torchvision.models.resnet18(num_classes=len(id_to_cat_map))
+#     model.fc = nn.Linear(512, len(id_to_cat_map))
+#     save_file = 'predictions-resnet18.csv'
+    
+#     model.load_state_dict(torch.load("logs/resnet18/20221011-071935/best.pth"))
+    
 #######################################################################################
     
 #######################################################################################    
-#     model = torchvision.models.mobilenet_v2(num_classes=len(id_to_cat_map))
-#     model.classifier = nn.Linear(1280, len(id_to_cat_map))  
-#     save_file = 'predictions-mobilenetv2.csv'
+
+    model_name = "mobilenet_v2"
+    model = torchvision.models.mobilenet_v2(num_classes=len(id_to_cat_map))
+    model.classifier = nn.Linear(1280, len(id_to_cat_map))  
+    save_file = 'predictions-mobilenetv2.csv'
+    
 #######################################################################################
 
 #######################################################################################
-    #model = test_model.ResNet18(num_classes=len(id_to_cat_map))
+#     model = test_model.ResNet18(num_classes=len(id_to_cat_map))
 #     save_file = 'predictions.csv'
 
 #######################################################################################
-    model.load_state_dict(torch.load("logs/resnet18-20221010-023016/checkpoint_19.pth"))
+    model.load_state_dict(torch.load("logs/mobilenetv2/20221011-080613/best.pth"))
+    
+    
     model.to(device)
     # put our model in eval mode before validationing!
     model.eval()

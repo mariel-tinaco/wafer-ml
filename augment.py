@@ -21,13 +21,11 @@ sd = (0.2, 5)
 def aug_flip(img, img_name, state, dst_dir, img_size = (128,128), train = False):
     prefix = "f"
 
-    for i in range(4):
+    for i in range(2):
         aug_img_name = "{}_{}{}".format(img_name, prefix, i)
 
-        if i > 1:
+        if i == 1:
             img = ImageOps.mirror(img)
-        if i % 2 == 0:
-            img = ImageOps.flip(img)
 
         #rotate resulting images
         aug_rotate(img, aug_img_name, state, dst_dir=dst_dir, img_size=img_size, train = train)
@@ -37,7 +35,7 @@ def aug_rotate(img, img_name, state, dst_dir, img_size = (128,128), train = Fals
     
     for i in range(4):
         aug_img_name = "{}_{}{}".format(img_name, prefix, i)
-        img = img.rotate(i*90)
+        img = img.rotate(90)
 
         #blur, rotate and/or add jitter to resulting images
         augment(img, aug_img_name, state, dst_dir=dst_dir, img_size=img_size, train = train)
@@ -119,6 +117,7 @@ def create_set(aug = 0, img_size = (128,128)):
             img = Image.open(img_src)
 
             aug_flip(img, img_name, state, dst_dir=new_dir, img_size=img_size, train = True)
+            # aug_rotate(img, img_name, state, dst_dir=new_dir, img_size=img_size, train = True) #aug_flip is bypassed
 
 
     print(f'Augmented dataset: {test_cnt} test, {train_cnt} train samples')
