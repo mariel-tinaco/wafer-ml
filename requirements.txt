@@ -9,3 +9,6 @@ pickle
 numpy
 scipy
 nvidia-pyindex
+torchmetrics
+matplotlib
+glob
