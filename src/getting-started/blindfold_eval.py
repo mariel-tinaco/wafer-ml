@@ -1,3 +1,4 @@
+import cmath
 import os
 from adc_dataset import get_category_map, load_image
 import torchvision
@@ -7,6 +8,23 @@ import csv
 from torchmetrics.functional.classification import multiclass_confusion_matrix
 import numpy as np
 import glob
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+class_names = ['CMPMicroscratch',
+                'CrystalDislocation', 
+                'DAP', 
+                'EnclosedDefect',
+                'EtchBlock',
+                'Fiber',
+                'Flake',
+                'MissingTrenchFill',
+                'NonVisual',
+                'Particle',
+                'PolyNodules',
+                'Residue']
 
 if __name__ == "__main__":
     device = "cpu"
@@ -47,8 +65,8 @@ if __name__ == "__main__":
     pred_label = []
     
     for key in names.keys():
-        for fname in names[key]:
-            img = tvf.to_tensor(load_image(paths[key]))
+        for index,fname in enumerate(names[key]):
+            img = tvf.to_tensor(load_image(paths[key][index]))
             img = torch.unsqueeze(img, dim=0)
             pred = torch.argmax(model(img), dim=1)
 
@@ -58,13 +76,25 @@ if __name__ == "__main__":
 
             # Get True Label
             for index,id in enumerate(map['id']):
-                if img_id == id:
+                if fname == id:
                     true_label.append(id_to_cat_map[map['label'][index]])
 
         n_classes = len(np.unique(map['label']))
-        target = torch.tensor([2, 1, 0, 0])
-        preds = torch.tensor([2, 1, 0, 1])
-        multiclass_confusion_matrix(preds, target, num_classes=3)
+        target = torch.tensor(true_label)
+        preds = torch.tensor(pred_label)
+        cm = multiclass_confusion_matrix(preds, target, num_classes=n_classes)
+
+        cm_df = pd.DataFrame(cm,
+                     index = class_names, 
+                     columns = class_names)
+
+        #Plotting the confusion matrix
+        plt.figure(figsize=(10,10))
+        sns.heatmap(cm_df, annot=True)
+        plt.title('Confusion Matrix')
+        plt.ylabel('Actal Values')
+        plt.xlabel('Predicted Values')
+        plt.savefig('Confusion_Matrix.png')
 
         with open('blindfoldtest.csv', 'w') as f:
             write = csv.writer(f)
@@ -73,4 +103,5 @@ if __name__ == "__main__":
                 write.writerow([str(img_id[index]), 
                                 str(pred_label[index]),
                                 str(true_label[index])])
+        
 
