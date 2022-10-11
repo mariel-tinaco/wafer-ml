@@ -9,3 +9,8 @@ ADC_Dataset/.DS_Store
 *.hdf5
 *.npz
 *.pth
+*.4
+*.3
+*.1
+*.2
+Plots/Training_accuracy_20221010_0855.png

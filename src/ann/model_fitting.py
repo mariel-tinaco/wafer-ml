@@ -86,7 +86,7 @@ model = keras.Model(inputs, outputs)
 
 
 print("Summary of Model")
-print(model.summary)
+print(model.summary())
 
 
 # set the optimiser
