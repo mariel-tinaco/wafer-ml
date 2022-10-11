@@ -74,8 +74,8 @@ if __name__ == "__main__":
                 print(
                     step_counter,
                     epoch,
-                    batch_loss.cpu().detach().numpy(),
                     accuracy.cpu().detach().numpy(),
+                    batch_loss.cpu().detach().numpy(),
                 )
             step_counter += 1
 
@@ -106,8 +106,8 @@ if __name__ == "__main__":
                 print(
                     step_counter,
                     epoch,
-                    val_loss.cpu().detach().numpy(),
                     val_acc.cpu().detach().numpy(),
+                    val_loss.cpu().detach().numpy(),
                 )
 
 

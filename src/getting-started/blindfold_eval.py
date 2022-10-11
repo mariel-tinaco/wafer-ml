@@ -9,14 +9,24 @@ import numpy as np
 import glob
 
 if __name__ == "__main__":
-    # this defines where we'll perform our training.  By default, we use the cpu.
-    # if you have a GPU and cuda set up properly, you can instead set this to 'cuda'
     device = "cpu"
 
-    # load the test images
-    data_dir = "./ADC_Dataset/test/"
-    items = os.listdir(data_dir)
-    items.sort()
+    
+    # set the directory where the data lives
+    froot = os.getcwd()
+    fpath = ('/ADC_Dataset/train/')
+    root_dir =  froot + fpath
+
+    # Get the Filenames and Filepaths of the Figures
+    folders = os.listdir(root_dir)
+
+    paths = {}
+    names = {}
+
+    for f in folders:
+        paths[f] = glob.glob(root_dir+f+'/'+'*.jpg', recursive=True)
+        names[f]  = [(os.path.split(i)[1]).split('.')[0] for i in paths[f]]
+
 
     # Get the category map to retitreve the category name from predictions
     _, id_to_cat_map = get_category_map()
@@ -28,38 +38,39 @@ if __name__ == "__main__":
     model.eval()
 
     # load the NPZ file for reference
-    data_path = os.getcwd()+'/DATASET_NPZ/preproc_train_test_224.npz'
+    data_path = os.getcwd()+'/DATASET_NPZ/id_to_label_map.npz'
     map = np.load(data_path)
 
     # Create an empty array to store the predictions
     img_id = []
     true_label = []
     pred_label = []
+    
+    for key in names.keys():
+        for fname in names[key]:
+            img = tvf.to_tensor(load_image(paths[key]))
+            img = torch.unsqueeze(img, dim=0)
+            pred = torch.argmax(model(img), dim=1)
 
-    for img_name in items:
-        img = tvf.to_tensor(load_image(data_dir + img_name))
-        img = torch.unsqueeze(img, dim=0)
-        pred = torch.argmax(model(img), dim=1)
+            # Get Predicted Label
+            img_id.append(fname)
+            pred_label.append(id_to_cat_map[pred.detach().numpy()[0]])
 
-        # Get Predicted Label
-        img_id.append(int(img_name.split(".")[0]))
-        pred_label.append(id_to_cat_map[pred.detach().numpy()[0]])
+            # Get True Label
+            for index,id in enumerate(map['id']):
+                if img_id == id:
+                    true_label.append(id_to_cat_map[map['label'][index]])
 
-        # Get True Label
-        for index,id in enumerate(map['id']):
-            if img_id == id:
-                true_label.append(id_to_cat_map[map['label'][index]])
+        n_classes = len(np.unique(map['label']))
+        target = torch.tensor([2, 1, 0, 0])
+        preds = torch.tensor([2, 1, 0, 1])
+        multiclass_confusion_matrix(preds, target, num_classes=3)
 
-    n_classes = len(np.unique(map['label']))
-    target = torch.tensor([2, 1, 0, 0])
-    preds = torch.tensor([2, 1, 0, 1])
-    multiclass_confusion_matrix(preds, target, num_classes=3)
-
-    with open('blindfoldtest.csv', 'w') as f:
-        write = csv.writer(f)
-        write.writerow(['Id', 'Predicted','True'])
-        for index in range(0,len(img_id)):
-            write.writerow([str(img_id[index]), 
-                            str(pred_label[index]),
-                            str(true_label[index])])
+        with open('blindfoldtest.csv', 'w') as f:
+            write = csv.writer(f)
+            write.writerow(['Id', 'Predicted','True'])
+            for index in range(0,len(img_id)):
+                write.writerow([str(img_id[index]), 
+                                str(pred_label[index]),
+                                str(true_label[index])])
 

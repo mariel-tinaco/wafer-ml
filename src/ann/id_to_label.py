@@ -44,9 +44,9 @@ for f in folders:
 id_data = []
 label_data = []
 
-# Split Data for Test and Train
+# Assign Label to every ID
 for key in names.keys():
-    for fname in paths[key]:
+    for fname in names[key]:
         id_data.append(fname)
         label_data.append(class_names_label[key])
 
