@@ -46,7 +46,7 @@ if __name__ == "__main__":
     # Start Training
     time_start = datetime.now()
     
-    print("Time Start: ", time_start)
+    print("Time Start: ", time_start.strftime("%H:%M:%S"))
     for epoch in range(N_EPOCHS):
         step_counter = 0
         print("EPOCH", epoch) 
@@ -141,5 +141,6 @@ if __name__ == "__main__":
     # Save Final Model 
     torch.save(model.state_dict(), "n_resnet152_final.pth")
     time_end = datetime.now()
-    print("Time End: ", time_end)
-    print("Elapsed Time: ", time_start-time_end)
+    elapsed = time_start-time_end
+    print("Time End: ", time_end.strftime("%H:%M:%S"))
+    print("Elapsed Time: ", elapsed.strftime("%H:%M:%S"))
