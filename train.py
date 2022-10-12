@@ -24,7 +24,9 @@ if __name__ == "__main__":
     save_folder = 'logs'
     
 #     data_set = 'ADC_Dataset'
-    data_set = 'ADC_Dataset_Augmented' 
+#     data_set = 'ADC_Dataset_Augmented'
+#     data_set = "data/ADC_Dataset_Split"
+    data_set = "data/ADC_Dataset_Split_Augmented"
     
     train_dir = data_set + '/train'
 
@@ -67,16 +69,16 @@ if __name__ == "__main__":
     print("Validation split: ", n_val)
 #######################################################################################
 
-    model_name = 'mobilenetv2'
-    model = torchvision.models.mobilenet.mobilenet_v2(pretrained=True)
-    model.classifier = nn.Linear(1280, num_classes)  
-    for child in model.children():
-        for grandchild in child.children():
-            ct+=1
-            if ct < 10:
-                for param in grandchild.parameters():
-                    param.requires_grad = False
-        break
+#     model_name = 'mobilenetv2'
+#     model = torchvision.models.mobilenet.mobilenet_v2(pretrained=True)
+#     model.classifier = nn.Linear(1280, num_classes)  
+#     for child in model.children():
+#         for grandchild in child.children():
+#             ct+=1
+#             if ct < 10:
+#                 for param in grandchild.parameters():
+#                     param.requires_grad = False
+#         break
 
 
 #######################################################################################   
@@ -85,24 +87,29 @@ if __name__ == "__main__":
 
 #     model_name = 'resnet18'
 #     model = torchvision.models.resnet18(pretrained=True)
+#     last_layer = 512
     
-# #     model_name = 'resnet34'
-# #     model = torchvision.models.resnet34(pretrained=True)
+#     model_name = 'resnet34'
+#     model = torchvision.models.resnet34(pretrained=True)
+#     last_layer = 512
     
-# #     model_name = 'resnet101'
-# #     model = torchvision.models.resnet101(pretrained=True)
+#     model_name = 'resnet50'
+#     model = torchvision.models.resnet50(pretrained=True)
+#     last_layer = 2048
     
-# #     model_name = 'resnet152'
-# #     model = torchvision.models.resnet152(pretrained=True)
+    model_name = 'resnet152'
+    model = torchvision.models.resnet152(pretrained=True)
+    last_layer = 2048
     
-#     model.fc = nn.Linear(512, num_classes)  
+    model.fc = nn.Linear(last_layer, num_classes)  
 
-#     for child in model.children():
-#         ct += 1
-#         if ct < 7:
-#             for param in child.parameters():
-#                 param.requires_grad = False   
-
+    for child in model.children():
+        ct += 1
+        if ct < 7:
+            for param in child.parameters():
+                param.requires_grad = False   
+#     print(model.parameters)
+#     print(ct)
 
 #######################################################################################
 
@@ -129,7 +136,8 @@ if __name__ == "__main__":
         f.write(f'Number of epochs: {num_epochs}\n')
         f.write('Optimizer: Adam\n')
         f.write(f'Initial Learning Rate: {lr}\n')
-        f.write(f'Weight Decay: {wd}\n\n')
+        f.write(f'Weight Decay: {wd}\n')
+        f.write(f'Dataset: {data_set}\n\n')
         f.write('#####Training Starts#####\n')
         f.close()
 
@@ -174,6 +182,7 @@ if __name__ == "__main__":
         total_validation_correct = 0
         wrong_counter = 0
         running_loss = 0
+        cm = np.zeros((num_classes,num_classes), dtype=int)
         for validation_images, validation_labels in validationiter:
 
             validation_images = validation_images.to(device)
@@ -187,6 +196,8 @@ if __name__ == "__main__":
 
             correct = torch.sum((validation_predictions == validation_labels).float())
             total_validation_correct += correct
+            for i in range(len(validation_labels.cpu().numpy())):
+                cm[validation_labels.cpu().numpy()[i]][validation_predictions.cpu().numpy()[i]] +=1
             
         validation_loss = running_loss / n_val
         validation_accuracy = total_validation_correct*100 / n_val
@@ -200,10 +211,13 @@ if __name__ == "__main__":
             torch.save(model.state_dict(), "{}/checkpoint_{:02d}.pth".format(log_dir, epoch))
             torch.save(model.state_dict(), f"{log_dir}/best.pth")
         print("BEST EPOCH: {}  Valdation Loss: {:.2f}  Validation Accuracy: {:.2f}%".format(best_epoch, best_epoch_loss, best_epoch_acc))
+        print(cm)
 
+        
         with open(f'{log_dir}/Training.txt', 'a+') as f:
             f.write("Valdation Loss: {:.2f}  Validation Accuracy: {:.2f}%\n".format(validation_loss, validation_accuracy))
-            f.write("BEST EPOCH: {}  Valdation Loss: {:.2f}  Validation Accuracy: {:.2f}%\n\n".format(best_epoch, best_epoch_loss, best_epoch_acc))
+            f.write("BEST EPOCH: {}  Valdation Loss: {:.2f}  Validation Accuracy: {:.2f}%\n".format(best_epoch, best_epoch_loss, best_epoch_acc))
+            f.write(f"Confusion Matrix:\n{str(cm)}\n\n")
             f.close()
 
         
