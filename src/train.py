@@ -45,7 +45,7 @@ if __name__ == "__main__":
     
     # Start Training
     time_start = datetime.now()
-    
+    val_tmp = 10000
     print("Time Start: ", time_start.strftime("%H:%M:%S"))
     for epoch in range(N_EPOCHS):
         step_counter = 0
@@ -136,11 +136,15 @@ if __name__ == "__main__":
             val_loss.cpu().detach().numpy(),
         )
         
-        # Save Model Checkpoints
-        torch.save(model.state_dict(), "n_resnet152_{:02d}.pth".format(epoch))
+        # Save Model Checkpoints (Val Loss)
+        if val_tmp >= val_loss.cpu().detach().numpy():
+            print('Validation Loss Improved by ',val_tmp - val_loss.cpu().detach().numpy())
+            val_tmp = val_loss.cpu().detach().numpy()
+            torch.save(model.state_dict(), "n_resnet152_{:02d}.pth".format(epoch))
+
     # Save Final Model 
     torch.save(model.state_dict(), "n_resnet152_final.pth")
     time_end = datetime.now()
     elapsed = time_start-time_end
     print("Time End: ", time_end.strftime("%H:%M:%S"))
-    print("Elapsed Time: ", elapsed.strftime("%H:%M:%S"))
+    print("Elapsed Time: ",elapsed)

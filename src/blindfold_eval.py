@@ -86,10 +86,10 @@ if __name__ == "__main__":
     _, id_to_cat_map = get_category_map()
 
     # load the trained model
-    model_name = 'resnet152_60'
+    model_name = 'n_resnet152_21'
     model = torchvision.models.resnet152(num_classes=len(id_to_cat_map))
     model.load_state_dict(torch.load('./'+model_name+'.pth'))
-    model.to(device)
+    model.to(device)  
     model.eval()
 
     # load the NPZ file for reference
@@ -101,6 +101,7 @@ if __name__ == "__main__":
     true_label = []
     pred_label = []
     counter = 0
+    bf_acc = 0
     for key in names.keys():
         for index,fname in enumerate(names[key]):
             counter += 1
@@ -118,7 +119,10 @@ if __name__ == "__main__":
                 if fname == id:
                     print(counter, fname)
                     true_label.append(map['label'][index])
+                    if pred.detach().numpy()[0] == map['label'][index]:
+                        bf_acc += 1
 
+    bf_acc = np.round(bf_acc/len(pred_label)*100,3)
     n_classes = len(np.unique(map['label']))
     target = torch.tensor(np.asarray(true_label))
     preds = torch.tensor(np.asarray(pred_label))
@@ -127,14 +131,14 @@ if __name__ == "__main__":
     plt.figure(figsize=[15,15])
     plot_confusion_matrix(cm, 
                         classes=class_names,
-                        normalize= True,
                         title='Wafer Defect Detection')
     plt.savefig('blind_confusion_plot_'+model_name+'.png')
     
     # Saving Data
-    with open('blindfoldtest.csv', 'w') as f:
+    with open('blindfoldtest_'+model_name+'.csv', 'w') as f:
         write = csv.writer(f)
-        write.writerow(['Id', 'Predicted','True'])
+        write.writerow(['Accuracy', bf_acc])
+        write.writerow(['Id', 'Predicted','True',])
         for index in range(0,len(img_id)):
             write.writerow([str(img_id[index]), 
                             str(pred_label[index]),

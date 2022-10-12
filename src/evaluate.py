@@ -19,8 +19,9 @@ if __name__ == "__main__":
     _, id_to_cat_map = get_category_map()
 
     # load the trained model
-    model = torchvision.models.resnet18(num_classes=len(id_to_cat_map))
-    model.load_state_dict(torch.load("./resnet18_17.pth"))
+    model_name = 'n_resnet152_39'
+    model = torchvision.models.resnet152(num_classes=len(id_to_cat_map))
+    model.load_state_dict(torch.load("./"+model_name+".pth"))
     model.to(device)
     # put our model in eval mode before validationing!
     model.eval()
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     # for a in predictions:
     #     print(a)
 
-    with open('predictions.csv', 'w') as f:
+    with open('predictions'+model_name+'.csv', 'w') as f:
         # using csv.writer method from CSV package
         write = csv.writer(f)
         write.writerow(["Id", "Category"])
