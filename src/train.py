@@ -2,13 +2,14 @@ from adc_dataset import ADC_Dataset
 import torchvision
 import torch.utils.data
 from torch.utils.tensorboard import SummaryWriter
+import numpy as np
 
 if __name__ == "__main__":
     # if you have a GPU and cuda set up properly, you can instead set this to 'cuda'
     device = 'cuda'
 
     # build our training data and validation data sets
-    dataset = ADC_Dataset("./ADC_Dataset/preproccesed", training=True)
+    dataset = ADC_Dataset("./ADC_Dataset/noised", training=True)
     n_images = len(dataset)
     n_val = int(n_images*.25)
     n_train = n_images - n_val
@@ -19,8 +20,7 @@ if __name__ == "__main__":
     print("Validation split: ", n_val)
     
     # Set Model Parameters
-    step_counter = 0
-    N_EPOCHS = 70
+    N_EPOCHS = 60
     N_BATCH = 16
 
     model = torchvision.models.resnet152(num_classes=num_classes)
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(model.parameters())
 
     loss_fn = torch.nn.CrossEntropyLoss()
-    writer = SummaryWriter("./logs/resnet152")
+    writer = SummaryWriter("./logs/n_resnet152")
 
     # Create Training and Valdiation Dataset 
     train_set, val_set = torch.utils.data.random_split(dataset, [n_train, n_val])
@@ -43,6 +43,7 @@ if __name__ == "__main__":
     
     # Start Training
     for epoch in range(N_EPOCHS):
+        step_counter = 0
         print("EPOCH", epoch) 
         trainiter = iter(train_dataloader)
 
@@ -69,13 +70,13 @@ if __name__ == "__main__":
 
             # Apply the new gradients
             optimizer.step()
-
-            if step_counter%50 == 0:
+            progress = np.round(step_counter/(n_images/N_BATCH)*100,2)
+            if step_counter%10 == 0:
                 print(
-                    step_counter,
-                    epoch,
-                    accuracy.cpu().detach().numpy(),
-                    batch_loss.cpu().detach().numpy(),
+                    progress,'%         ',
+                    '   Epoch:',epoch,
+                    '   Acc: ',accuracy.cpu().detach().numpy(),
+                    '   Loss: ',batch_loss.cpu().detach().numpy(),
                 )
             step_counter += 1
 
@@ -131,7 +132,7 @@ if __name__ == "__main__":
         )
         
         # Save Model Checkpoints
-        torch.save(model.state_dict(), "resnet152_{:02d}.pth".format(epoch))
+        torch.save(model.state_dict(), "n_resnet152_{:02d}.pth".format(epoch))
     
     # Save Final Model 
-    torch.save(model.state_dict(), "resnet152_final.pth")
+    torch.save(model.state_dict(), "n_resnet152_final.pth")

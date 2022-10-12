@@ -64,7 +64,7 @@ names = {}
 
 # directory where data will be saved
 
-ftarget = ('/ADC_Dataset/preprocessed2/')
+ftarget = ('/ADC_Dataset/noised/')
 
 # Apply all processes and augment
 # augmentation
@@ -92,13 +92,14 @@ for key in paths.keys():
         append_str = '_r'
         print(key,': ',np.round(index/len(paths[key])*100,2),' %  ')
         img = cv2.imread(fpath)
+        RAW_IMG = img
         cv2.imwrite(names[key][index]+append_str+'.jpg', img)
 
         # Augment then Save
         rotates(img,append_str)
         flips(img,append_str)
 
-        # Denoise
+        '''# Denoise
         append_str = '_d'
         den = cv2.fastNlMeansDenoising(np.asarray(img),None,7,11,81)
         cv2.imwrite(names[key][index]+append_str+'.jpg', den)
@@ -106,8 +107,10 @@ for key in paths.keys():
         # Augment then Save
         rotates(den,append_str)
         flips(den,append_str)
+        '''
 
-        # Add Gaussian Noise
+
+        '''# Add Gaussian Noise
         append_str = '_n'
         row,col,ch= img.shape
         mean = 0.5
@@ -115,28 +118,35 @@ for key in paths.keys():
         sigma = var**0.5
         gauss = np.random.normal(mean,sigma,(row,col,ch))
         gauss = gauss.reshape(row,col,ch)
-        noised = img+gauss
-        cv2.imwrite(names[key][index]+append_str+'.jpg', noised)
-        
-
-        plt.imshow(noised,cmap='gray')
-        plt.show()
-        
+        img = img+gauss
+        cv2.imwrite(names[key][index]+append_str+'.jpg', img)
+    
         # Augment then Save
-        rotates(noised,append_str)
-        flips(noised,append_str)
+        rotates(img,append_str)
+        flips(img,append_str)
+        '''
 
         # Edge Enhanced
         append_str = '_e'
-        img_edge = Image.fromarray(img)
-        img_edge = img_edge.filter(ImageFilter.EDGE_ENHANCE)
-        img_edge = np.asarray(img_edge, dtype='uint8')
-        cv2.imwrite(names[key][index]+append_str+'.jpg', img_edge)
+        img = Image.fromarray(RAW_IMG)
+        img = img.filter(ImageFilter.EDGE_ENHANCE)
+        img = np.asarray(img, dtype='uint8')
+        cv2.imwrite(names[key][index]+append_str+'.jpg', img)
 
         # Augment then Save
-        rotates(img_edge,append_str)
-        flips(img_edge,append_str)
+        rotates(img,append_str)
+        flips(img,append_str)
 
+        # Blurred
+        append_str = '_b'
+        img = Image.fromarray(RAW_IMG)
+        img = img.filter(ImageFilter.BLUR)
+        img = np.asarray(img, dtype='uint8')
+        cv2.imwrite(names[key][index]+append_str+'.jpg', img)
+
+        # Augment then Save
+        rotates(img,append_str)
+        flips(img,append_str)
 
         
 
