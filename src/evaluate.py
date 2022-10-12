@@ -19,8 +19,8 @@ if __name__ == "__main__":
     _, id_to_cat_map = get_category_map()
 
     # load the trained model
-    model = torchvision.models.resnet152(num_classes=len(id_to_cat_map))
-    model.load_state_dict(torch.load("./resnet152_58.pth"))
+    model = torchvision.models.resnet18(num_classes=len(id_to_cat_map))
+    model.load_state_dict(torch.load("./resnet18_17.pth"))
     model.to(device)
     # put our model in eval mode before validationing!
     model.eval()

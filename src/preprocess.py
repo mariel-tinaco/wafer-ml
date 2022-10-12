@@ -64,12 +64,12 @@ names = {}
 
 # directory where data will be saved
 
-ftarget = ('/ADC_Dataset/preproccesed/')
+ftarget = ('/ADC_Dataset/preprocessed2/')
 
-# Go trough all images and apply
+# Apply all processes and augment
 # augmentation
 # denoising
-# denoising + augmentation
+# Edge Enhance
 
 
 # Load Data Paths and Filenames
@@ -110,14 +110,18 @@ for key in paths.keys():
         # Add Gaussian Noise
         append_str = '_n'
         row,col,ch= img.shape
-        mean = 0
-        var = 0.1
+        mean = 0.5
+        var = 0.5
         sigma = var**0.5
         gauss = np.random.normal(mean,sigma,(row,col,ch))
         gauss = gauss.reshape(row,col,ch)
-        noised = cv2.add(img, gauss)
-        cv2.imwrite(names[key][index]+append_str+'.jpg', den)
+        noised = img+gauss
+        cv2.imwrite(names[key][index]+append_str+'.jpg', noised)
+        
 
+        plt.imshow(noised,cmap='gray')
+        plt.show()
+        
         # Augment then Save
         rotates(noised,append_str)
         flips(noised,append_str)
@@ -126,9 +130,8 @@ for key in paths.keys():
         append_str = '_e'
         img_edge = Image.fromarray(img)
         img_edge = img_edge.filter(ImageFilter.EDGE_ENHANCE)
-        img_edge = img_edge.filter(ImageFilter.EDGE_ENHANCE_MORE)
         img_edge = np.asarray(img_edge, dtype='uint8')
-        cv2.imwrite(names[key][index]+append_str+'.jpg', den)
+        cv2.imwrite(names[key][index]+append_str+'.jpg', img_edge)
 
         # Augment then Save
         rotates(img_edge,append_str)
